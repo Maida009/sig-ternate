@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SIG Tempat Ibadah Ternate</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fafc; }
+        
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+        
+        /* Sidebar - Hijau Gelap */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1e5128 0%, #2d6a4f 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .logo i { font-size: 32px; color: #95d5b2; }
+        
+        .sidebar-nav { flex: 1; padding: 25px 0; overflow-y: auto; }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #d8f3dc;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin: 5px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        
+        .nav-item i { font-size: 18px; width: 24px; }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background: #e63946;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover { background: #d62839; transform: translateY(-2px); }
+        
+        /* Main Content */
+        .main-wrapper {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .top-header {
+            background: white;
+            padding: 25px 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-bottom: 3px solid #52b788;
+        }
+        
+        .top-header h1 { 
+            font-size: 26px; 
+            color: #1e5128; 
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .top-header p { color: #6c757d; font-size: 14px; }
+        
+        .dashboard-content { padding: 30px; flex: 1; }
+        
+        /* Stats Grid - Tema Hijau */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 12px rgba(30, 81, 40, 0.08);
+            transition: all 0.3s;
+            border-left: 4px solid #52b788;
+        }
+        
+        .stat-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 20px rgba(30, 81, 40, 0.15);
+        }
+        
+        .stat-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .stat-icon.green-light { background: #d8f3dc; color: #40916c; }
+        .stat-icon.green { background: #b7e4c7; color: #2d6a4f; }
+        .stat-icon.green-dark { background: #95d5b2; color: #1e5128; }
+        .stat-icon.green-accent { background: #52b788; color: white; }
+        
+        .stat-details h3 { 
+            font-size: 32px; 
+            color: #1e5128; 
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+        .stat-details p { color: #6c757d; font-size: 14px; }
+        
+        /* Charts - Tema Hijau */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(30, 81, 40, 0.08);
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+        
+        .chart-header { 
+            padding: 20px 25px; 
+            border-bottom: 2px solid #d8f3dc;
+            background: #f8fafc;
+        }
+        .chart-header h3 { 
+            font-size: 16px; 
+            color: #1e5128;
+            font-weight: 600;
+        }
+        .chart-body { padding: 25px; }
+        
+        /* Quick Actions - Tema Hijau */
+        .quick-actions {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(30, 81, 40, 0.08);
+            border: 1px solid #e9ecef;
+        }
+        
+        .quick-actions h3 { 
+            margin-bottom: 20px; 
+            color: #1e5128;
+            font-weight: 600;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .action-btn {
+            padding: 20px;
+            background: linear-gradient(135deg, #d8f3dc 0%, #b7e4c7 100%);
+            border: 2px solid #95d5b2;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #1e5128;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .action-btn:hover {
+            background: linear-gradient(135deg, #b7e4c7 0%, #95d5b2 100%);
+            border-color: #52b788;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(82, 183, 136, 0.3);
+        }
+        
+        .action-btn i { 
+            font-size: 24px; 
+            color: #2d6a4f; 
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+            .main-wrapper { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>SIG Ternate</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="peta.html" class="nav-item">
+                    <i class="fas fa-map"></i>
+                    <span>Peta</span>
+                </a>
+                <a href="data.html" class="nav-item">
+                    <i class="fas fa-database"></i>
+                    <span>Data</span>
+                </a>
+                <a href="user.html" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>User</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Keluar</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <header class="top-header">
+                <h1>Dashboard Statistik</h1>
+                <p>Data Tempat Ibadah - Kecamatan Ternate Selatan & Tengah</p>
+            </header>
+
+            <main class="dashboard-content">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon green-light">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="totalTempatIbadah">0</h3>
+                            <p>Total Tempat Ibadah</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-mosque"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="totalMasjid">0</h3>
+                            <p>Total Masjid</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon green-dark">
+                            <i class="fas fa-church"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="totalGereja">0</h3>
+                            <p>Total Gereja</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon green-accent">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="totalKecamatan">2</h3>
+                            <p>Kecamatan</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-pie" style="margin-right: 8px; color: #52b788;"></i>Distribusi per Kecamatan</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="kecamatanChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-bar" style="margin-right: 8px; color: #52b788;"></i>Distribusi per Kategori</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="kategoriChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3><i class="fas fa-bolt" style="margin-right: 8px; color: #52b788;"></i>Aksi Cepat</h3>
+                    <div class="action-buttons">
+                        <a href="peta.html" class="action-btn">
+                            <i class="fas fa-map"></i>
+                            <span>Lihat Peta</span>
+                        </a>
+                        <a href="data.html" class="action-btn">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Tambah Data</span>
+                        </a>
+                        <a href="data.html" class="action-btn">
+                            <i class="fas fa-edit"></i>
+                            <span>Kelola Data</span>
+                        </a>
+                        <a href="user.html" class="action-btn">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Profil User</span>
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Default data yang SAMA dengan peta.html
+        const defaultData = [
+            { id: 1, nama: "Masjid Babul Jannah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Merdeka", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 500, latitude: 0.79745, longitude: 127.3637013 },
+            { id: 2, nama: "Masjid Ainul Yaqin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pahlawan", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 300, latitude: 0.799216, longitude: 127.360860 },
+            { id: 3, nama: "Masjid Ikhwanul Muslimin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sudirman", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 400, latitude: 0.79949, longitude: 127.38203 },
+            { id: 4, nama: "Masjid Nurul Iman", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sultan Babullah", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 350, latitude: 0.79371, longitude: 127.38298 },
+            { id: 5, nama: "Masjid Al-Hidayah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Ahmad Yani", kelurahan: "Makassar Selatan", kecamatan: "Ternate Tengah", kapasitas: 350, latitude: 0.79413, longitude: 127.38553 },
+            { id: 6, nama: "Masjid Al-Islah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Diponegoro", kelurahan: "Makassar Selatan", kecamatan: "Ternate Tengah", kapasitas: 450, latitude: 0.78959, longitude: 127.38131 },
+            { id: 7, nama: "Masjid Al-Khairat", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pattimura", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 380, latitude: 0.79566, longitude: 127.38447 },
+            { id: 8, nama: "Masjid Al-Amin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Hasanuddin", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 420, latitude: 0.78789, longitude: 127.38721 },
+            { id: 9, nama: "Masjid Al-Mujahidin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Veteran", kelurahan: "Makassar Selatan", kecamatan: "Ternate selatan", kapasitas: 360, latitude: 0.77568, longitude: 127.37924 },
+            { id: 10, nama: "Masjid At-Taqwa", agama: "Islam", jenis: "Masjid", alamat: "Jl. Gatot Subroto", kelurahan: "Salahudin", kecamatan: "Ternate Tengah", kapasitas: 400, latitude: 0.79104, longitude: 127.37995 },
+            { id: 11, nama: "Masjid Al-Munawar", agama: "Islam", jenis: "Masjid", alamat: "Jl. Suprapto", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 340, latitude: 0.78962, longitude: 127.39006 },
+            { id: 12, nama: "Masjid Al-Muttaqin", agama: "Islam", jenis: "Masjid", alamat: "Jl. MT. Habib ABUBAKAR ALATAS", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 380, latitude: 0.79173, longitude: 127.38789 },
+            { id: 13, nama: "Masjid Nurul Bazar", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sultan M. Djabir Syah", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 320, latitude: 0.79325, longitude: 127.38887 },
+            { id: 14, nama: "Masjid Nurul Mubin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pendidikan", kelurahan: "Maliaro", kecamatan: "Ternate Tengah", kapasitas: 360, latitude: 0.78884, longitude: 127.37716 },
+            { id: 15, nama: "Masjid Darul Arqam", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sultan Khairun No. 76", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 400, latitude: 0.79736, longitude: 127.38475 },
+            { id: 16, nama: "Masjid Al-Fatah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Gamayou Blok A", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 380, latitude: 0.79602, longitude: 127.37635 },
+            { id: 17, nama: "Masjid Miftahul Huda", agama: "Islam", jenis: "Masjid", alamat: "Jl. Gamayou", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 360, latitude: 0.79855, longitude: 127.37325 },
+            { id: 18, nama: "Masjid An-Nur", agama: "Islam", jenis: "Masjid", alamat: "Jl. Cahaya", kelurahan: "Maliaro", kecamatan: "Ternate Tengah", kapasitas: 340, latitude: 0.78807, longitude: 127.37707 },
+            { id: 19, nama: "Masjid Arrahman", agama: "Islam", jenis: "Masjid", alamat: "Jl. Rahmat", kelurahan: "Maliaro", kecamatan: "Ternate Tengah", kapasitas: 380, latitude: 0.78388, longitude: 127.37607 },
+            { id: 20, nama: "Masjid Nurul Hijrah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Raya Kalumata", kelurahan: "Kalumata", kecamatan: "Ternate Selatan", kapasitas: 450, latitude: 0.76180, longitude: 127.36409 },
+            { id: 21, nama: "Masjid Hubbuddin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Ngade Raya", kelurahan: "Kalumata", kecamatan: "Ternate Selatan", kapasitas: 380, latitude: 0.76127, longitude: 127.36635 },
+            { id: 22, nama: "Masjid Nurul Fatah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sasa Indah", kelurahan: "Bastiong Karance", kecamatan: "Ternate Selatan", kapasitas: 320, latitude: 0.76606, longitude: 127.37376 },
+            { id: 23, nama: "Masjid Nurul Yakin", agama: "Islam", jenis: "Masjid", alamat: "", kelurahan: "Tabona", kecamatan: "Ternate Selatan", kapasitas: 360, latitude: 0.77256, longitude: 127.36718 },
+            { id: 24, nama: "Masjid Raudhatul Murtasyidin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pantai Sasa", kelurahan: "Fitu", kecamatan: "Ternate Selatan", kapasitas: 400, latitude: 0.75814, longitude: 127.34488 },
+            { id: 25, nama: "Masjid An-Nur", agama: "Islam", jenis: "Masjid", alamat: "Jl. Ngade Selatan", kelurahan: "Ngade", kecamatan: "Ternate Selatan", kapasitas: 380, latitude: 0.758945, longitude: 127.35600 },
+            { id: 26, nama: "Masjid Hibbatullah", agama: "Islam", jenis: "Masjid", alamat: "Jl. kalumata Utara", kelurahan: "Kalumata", kecamatan: "Ternate Selatan", kapasitas: 340, latitude: 0.76436, longitude: 127.35843 },
+            { id: 27, nama: "Masjid Raudhatul Hidayah", agama: "Islam", jenis: "Masjid", alamat: "Jl. ", kelurahan: "Kalumata", kecamatan: "Ternate Selatan", kapasitas: 420, latitude: 0.76547, longitude: 127.36496 },
+            { id: 28, nama: "Masjid Syekh Yusuf", agama: "Islam", jenis: "Masjid", alamat: "Jl. ", kelurahan: "Bastiong Talangame", kecamatan: "Ternate Selatan", kapasitas: 400, latitude: 0.76917, longitude: 127.37560 },
+            { id: 29, nama: "Masjid Al-Amin", agama: "Islam", jenis: "Masjid", alamat: "Jl. falajawa Dua", kelurahan: "Bastiong Karance", kecamatan: "Ternate Selatan", kapasitas: 380, latitude: 0.76457, longitude: 127.37144 },
+            { id: 31, nama: "Masjid Khairil Jama'ah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pahlawan", kelurahan: "Kayu Merah", kecamatan: "Ternate Selatan", kapasitas: 360, latitude: 0.76305, longitude: 127.36986 },
+            { id: 32, nama: "Masjid Alauddin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sultan", kelurahan: "Ubo-Ubo", kecamatan: "Ternate Selatan", kapasitas: 400, latitude: 0.76858, longitude: 127.36986 },
+            { id: 33, nama: "GPM Immanuel Ternate", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Gereja No. 1", kelurahan: "Stadion", kecamatan: "Ternate Tengah", kapasitas: 350, latitude: 0.78707, longitude: 127.38577 },
+            { id: 34, nama: "GMIH Eben Haezer", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Bethel No. 5", kelurahan: "Tanah Raja", kecamatan: "Ternate Tengah", kapasitas: 300, latitude: 0.78731, longitude: 127.38616 },
+            { id: 35, nama: "GPDI El-Shaddai", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Yos Sudarso", kelurahan: "Kalumpang", kecamatan: "Ternate Tengah", kapasitas: 280, latitude: 0.78934, longitude: 127.38573 },
+            { id: 36, nama: "GKPMI Bethlehem", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Kapitan Pattimura", kelurahan: "Kalumpang", kecamatan: "Ternate Tengah", kapasitas: 320, latitude: 0.78863, longitude: 127.38505 },
+            { id: 37, nama: "GPT Kristus Raja", agama: "Kristen", jenis: "Gereja", alamat: "Jl. A.I.S Nasution", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 340, latitude: 0.78880, longitude: 127.38693 },
+            { id: 38, nama: "GBI Bethany", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Sion No. 2", kelurahan: "Jati", kecamatan: "Ternate Selatan", kapasitas: 300, latitude: 0.77594, longitude: 127.37740 },
+            { id: 39, nama: "GBI Filadelfia", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Stadion", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 280, latitude: 0.78571, longitude: 127.38386 },
+            { id: 40, nama: "MRII Kota Ternate", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Nazaret No. 4", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 260, latitude: 0.79236, longitude: 127.38977 }
+        ];
+
+        // Check authentication & load data
+        window.addEventListener('load', function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn !== 'true') {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            loadDashboardData();
+        });
+
+        function loadDashboardData() {
+            // Load dari localStorage ATAU gunakan default data
+            const storedData = localStorage.getItem('placesOfWorship');
+            const places = storedData ? JSON.parse(storedData) : defaultData;
+            
+            // Hitung statistik
+            const totalMasjid = places.filter(p => p.agama === 'Islam' || p.jenis === 'Masjid').length;
+            const totalGereja = places.filter(p => p.agama === 'Kristen' || p.jenis === 'Gereja').length;
+            const totalTengah = places.filter(p => p.kecamatan === 'Ternate Tengah').length;
+            const totalSelatan = places.filter(p => p.kecamatan === 'Ternate Selatan').length;
+            
+            // Update UI
+            document.getElementById('totalTempatIbadah').textContent = places.length;
+            document.getElementById('totalMasjid').textContent = totalMasjid;
+            document.getElementById('totalGereja').textContent = totalGereja;
+            
+            // Chart Kecamatan (Doughnut) - Tema Hijau
+            new Chart(document.getElementById('kecamatanChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ternate Tengah', 'Ternate Selatan'],
+                    datasets: [{
+                        data: [totalTengah, totalSelatan],
+                        backgroundColor: ['#52b788', '#2d6a4f'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom',
+                            labels: { 
+                                padding: 15, 
+                                usePointStyle: true,
+                                color: '#1e5128',
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Chart Kategori (Bar) - Tema Hijau
+            new Chart(document.getElementById('kategoriChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Masjid', 'Gereja'],
+                    datasets: [{
+                        label: 'Jumlah',
+                        data: [totalMasjid, totalGereja],
+                        backgroundColor: ['#52b788', '#95d5b2'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { 
+                        legend: { display: false } 
+                    },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { 
+                                stepSize: 5,
+                                color: '#6c757d'
+                            },
+                            grid: { color: '#e9ecef' }
+                        },
+                        x: {
+                            ticks: { color: '#1e5128' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ Dashboard loaded');
+            console.log(`📊 Total: ${places.length} tempat ibadah`);
+            console.log(`🕌 Masjid: ${totalMasjid}`);
+            console.log(`⛪ Gereja: ${totalGereja}`);
+        }
+
+        function logout() {
+            if(confirm('Apakah Anda yakin ingin keluar?')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Data - SIG Tempat Ibadah Ternate</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fafc; }
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #1e5128 0%, #2d6a4f 100%); color: white; position: fixed; height: 100vh; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: bold; }
+        .logo i { font-size: 32px; color: #95d5b2; }
+        .sidebar-nav { flex: 1; padding: 25px 0; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #d8f3dc; text-decoration: none; transition: all 0.3s; margin: 5px 12px; border-radius: 10px; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.15); color: white; }
+        .nav-item i { font-size: 18px; width: 24px; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.15); }
+        .btn-logout { width: 100%; padding: 12px; background: #e63946; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+        .btn-logout:hover { background: #d62839; transform: translateY(-2px); }
+        .main-wrapper { flex: 1; margin-left: 260px; display: flex; flex-direction: column; }
+        .top-header { background: white; padding: 25px 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-bottom: 3px solid #52b788; }
+        .top-header h1 { font-size: 26px; color: #1e5128; margin-bottom: 5px; }
+        .top-header p { color: #6c757d; font-size: 14px; }
+        .dashboard-content { padding: 30px; }
+        .data-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
+        .search-filter { display: flex; gap: 10px; flex: 1; min-width: 300px; }
+        .search-filter input, .search-filter select { padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: white; outline: none; transition: border-color 0.3s; }
+        .search-filter input:focus { border-color: #52b788; }
+        .search-filter input { flex: 2; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.3s; }
+        .btn-primary { background: #52b788; color: white; }
+        .btn-primary:hover { background: #40916c; transform: translateY(-2px); }
+        .btn-secondary { background: #e9ecef; color: #4a5568; }
+        .btn-secondary:hover { background: #dee2e6; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .table-wrapper { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(30, 81, 40, 0.08); overflow-x: auto; border: 1px solid #e9ecef; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #f1f3f5; font-size: 14px; }
+        th { background: #f8fafc; font-weight: 600; color: #1e5128; font-size: 13px; text-transform: uppercase; }
+        tr:hover { background: #f8fafc; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-masjid { background: #d8f3dc; color: #1e5128; }
+        .badge-gereja { background: #e3f2fd; color: #1565c0; }
+        .btn-sm { padding: 6px 8px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; margin: 0 2px; transition: all 0.2s; }
+        .btn-edit { background: #52b788; color: white; }
+        .btn-delete { background: #e63946; color: white; }
+        .btn-sm:hover { opacity: 0.85; transform: translateY(-1px); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-box { background: white; width: 90%; max-width: 600px; border-radius: 12px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { padding: 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { color: #1e5128; }
+        .modal-close { cursor: pointer; font-size: 24px; color: #adb5bd; }
+        .modal-body { padding: 20px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #4a5568; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group input:focus { border-color: #52b788; }
+        .form-group.full { grid-column: 1 / -1; }
+        .modal-footer { padding: 15px 20px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 10px; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; gap: 15px; }
+        .loading-overlay.hidden { display: none; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top-color: #52b788; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; color: white; font-weight: 500; z-index: 9999; animation: slideIn 0.3s ease; }
+        .toast.success { background: #52b788; }
+        .toast.error { background: #e63946; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading-overlay"><div class="spinner"></div><p>Memuat data dari database...</p></div>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header"><div class="logo"><i class="fas fa-map-marked-alt"></i><span>SIG Ternate</span></div></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a href="peta.html" class="nav-item"><i class="fas fa-map"></i><span>Peta</span></a>
+                <a href="data.html" class="nav-item active"><i class="fas fa-database"></i><span>Data</span></a>
+                <a href="user.html" class="nav-item"><i class="fas fa-user"></i><span>User</span></a>
+            </nav>
+            <div class="sidebar-footer"><button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></button></div>
+        </aside>
+
+        <div class="main-wrapper">
+            <header class="top-header"><h1>Kelola Data Tempat Ibadah</h1><p>Tambah, edit, dan hapus data tempat ibadah</p></header>
+            <main class="dashboard-content">
+                <div class="data-controls">
+                    <div class="search-filter">
+                        <input type="text" id="searchInput" placeholder="🔍 Cari nama atau alamat...">
+                        <select id="filterKategori">
+                            <option value="">Semua Kategori</option>
+                            <option value="Masjid">Masjid</option>
+                            <option value="Gereja">Gereja</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal()" id="btnAdd"><i class="fas fa-plus"></i> Tambah Data</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama</th>
+                                <th>Kategori</th>
+                                <th>Kecamatan</th>
+                                <th>Kelurahan</th>
+                                <th>Alamat</th>
+                                <th style="width: 100px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="formModal" class="modal">
+        <div class="modal-box">
+            <div class="modal-header"><h3 id="modalTitle">Tambah Data</h3><span class="modal-close" onclick="closeModal()">&times;</span></div>
+            <form id="dataForm" class="modal-body">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Nama Tempat Ibadah *</label>
+                        <input type="text" id="nama" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori *</label>
+                        <select id="kategori" required>
+                            <option value="">Pilih</option>
+                            <option value="Masjid">Masjid</option>
+                            <option value="Gereja">Gereja</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kecamatan *</label>
+                        <select id="kecamatan" required>
+                            <option value="">Pilih</option>
+                            <option value="Ternate Selatan">Ternate Selatan</option>
+                            <option value="Ternate Tengah">Ternate Tengah</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Kelurahan</label>
+                        <input type="text" id="kelurahan" placeholder="Contoh: Makassar Barat">
+                    </div>
+                    <div class="form-group full">
+                        <label>Alamat Lengkap *</label>
+                        <textarea id="alamat" rows="2" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Latitude *</label>
+                        <input type="number" step="any" id="latitude" required placeholder="Contoh: 0.789">
+                    </div>
+                    <div class="form-group">
+                        <label>Longitude *</label>
+                        <input type="number" step="any" id="longitude" required placeholder="Contoh: 127.367">
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                <button type="button" class="btn btn-primary" id="btnSave" onclick="saveData()">💾 Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let places = [];
+        const defaultData = []; // Data diambil dari Supabase
+
+        // ===================================================================
+        // FORMAT MAPPING (Web <-> Database)
+        // ===================================================================
+        function formatForSupabase(data) {
+            return {
+                nama: data.nama,
+                jenis: data.jenis,
+                kecamatan: data.kecamatan,
+                kelurahan: data.kelurahan || '',
+                alamat: data.alamat,
+                lintang: parseFloat(data.latitude),
+                garis_bujur: parseFloat(data.longitude)
+            };
+        }
+
+        function formatFromSupabase(data) {
+            return data.map(item => ({
+                id: item.pengenal || item.id,
+                nama: item.nama,
+                jenis: item.jenis,
+                agama: item.jenis === 'Masjid' ? 'Islam' : 'Kristen',
+                kecamatan: item.kecamatan || '-',
+                kelurahan: item.kelurahan || '-',
+                alamat: item.alamat || '',
+                kapasitas: item.kapasitas || 0,
+                latitude: item.lintang || item.latitude,
+                longitude: item.garis_bujur || item.longitude
+            }));
+        }
+
+        // ===================================================================
+        // INIT & LOAD
+        // ===================================================================
+        window.addEventListener('load', async function() {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'index.html';
+                return;
+            }
+            await loadData();
+        });
+
+        async function loadData() {
+            showLoading();
+            try {
+                const connected = await testConnection();
+                if (!connected) throw new Error('Koneksi gagal');
+                
+                const rawData = await getDataIbadah();
+                places = rawData && rawData.length > 0 ? formatFromSupabase(rawData) : [];
+                console.log('✅ Data loaded:', places.length);
+            } catch (error) {
+                console.error('❌ Load error:', error);
+                showToast('Gagal memuat data dari database', 'error');
+                places = [];
+            } finally {
+                hideLoading();
+                renderTable();
+            }
+        }
+
+        // ===================================================================
+        // RENDER TABLE
+        // ===================================================================
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const kat = document.getElementById('filterKategori').value;
+            
+            let filtered = places.filter(p => {
+                const matchSearch = p.nama.toLowerCase().includes(search) || p.alamat.toLowerCase().includes(search) || (p.kelurahan && p.kelurahan.toLowerCase().includes(search));
+                const matchKat = !kat || p.jenis === kat;
+                return matchSearch && matchKat;
+            });
+
+            tbody.innerHTML = '';
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 30px; color: #888;">Tidak ada data ditemukan</td></tr>';
+                return;
+            }
+
+            filtered.forEach((p, i) => {
+                const badgeClass = p.jenis === 'Masjid' ? 'badge-masjid' : 'badge-gereja';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td><strong>${p.nama}</strong></td>
+                        <td><span class="badge ${badgeClass}">${p.jenis}</span></td>
+                        <td>${p.kecamatan}</td>
+                        <td>${p.kelurahan}</td>
+                        <td>${p.alamat}</td>
+                        <td>
+                            <button class="btn-sm btn-edit" onclick="editData(${p.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn-sm btn-delete" onclick="deleteData(${p.id})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        // ===================================================================
+        // MODAL & CRUD
+        // ===================================================================
+        function openModal(id = null) {
+            document.getElementById('formModal').classList.add('active');
+            document.getElementById('dataForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('modalTitle').textContent = id ? 'Edit Data' : 'Tambah Data Baru';
+            document.getElementById('btnSave').disabled = false;
+            
+            if (id) {
+                const p = places.find(x => x.id === id);
+                if (p) {
+                    document.getElementById('editId').value = p.id;
+                    document.getElementById('nama').value = p.nama;
+                    document.getElementById('kategori').value = p.jenis;
+                    document.getElementById('kecamatan').value = p.kecamatan;
+                    document.getElementById('kelurahan').value = p.kelurahan === '-' ? '' : p.kelurahan;
+                    document.getElementById('alamat').value = p.alamat;
+                    document.getElementById('latitude').value = p.latitude;
+                    document.getElementById('longitude').value = p.longitude;
+                }
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('formModal').classList.remove('active');
+        }
+
+        async function saveData() {
+            const form = document.getElementById('dataForm');
+            if (!form.checkValidity()) { form.reportValidity(); return; }
+
+            const btnSave = document.getElementById('btnSave');
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            const id = document.getElementById('editId').value;
+            const jenis = document.getElementById('kategori').value;
+            
+            const newData = {
+                nama: document.getElementById('nama').value,
+                jenis: jenis,
+                kecamatan: document.getElementById('kecamatan').value,
+                kelurahan: document.getElementById('kelurahan').value,
+                alamat: document.getElementById('alamat').value,
+                latitude: parseFloat(document.getElementById('latitude').value),
+                longitude: parseFloat(document.getElementById('longitude').value)
+            };
+
+            try {
+                const payload = formatForSupabase(newData);
+                let success = false;
+
+                if (id) {
+                    success = await updateDataIbadah(parseInt(id), payload);
+                } else {
+                    success = await saveDataIbadah(payload);
+                }
+
+                if (success) {
+                    await loadData(); // Refresh data dari DB
+                    showToast('✅ Data berhasil disimpan!', 'success');
+                    closeModal();
+                } else {
+                    showToast('❌ Gagal menyimpan data', 'error');
+                }
+            } catch (error) {
+                console.error('💥 Save error:', error);
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '💾 Simpan';
+            }
+        }
+
+        async function deleteData(id) {
+            if (!confirm('Yakin ingin menghapus data ini?')) return;
+            try {
+                const success = await deleteDataIbadah(id);
+                if (success) {
+                    await loadData();
+                    showToast('✅ Data berhasil dihapus', 'success');
+                } else {
+                    showToast('❌ Gagal menghapus data', 'error');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        }
+
+        function editData(id) { openModal(id); }
+
+        // ===================================================================
+        // UTILITIES
+        // ===================================================================
+        function showLoading() { document.getElementById('loading').classList.remove('hidden'); }
+        function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
+        function showToast(msg, type) {
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+        function logout() {
+            if (confirm('Keluar dari sistem?')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderTable);
+        document.getElementById('filterKategori').addEventListener('change', renderTable);
+        window.onclick = function(e) { if (e.target.classList.contains('modal')) closeModal(); };
+    </script>
+</body>
+</html>

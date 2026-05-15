@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil User - SIG Tempat Ibadah</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fafc; }
+        
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+        
+        /* Sidebar - Tema Hijau */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1e5128 0%, #2d6a4f 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-header { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: bold; }
+        .logo i { font-size: 32px; color: #95d5b2; }
+        
+        .sidebar-nav { flex: 1; padding: 25px 0; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 20px; color: #d8f3dc;
+            text-decoration: none; transition: all 0.3s;
+            margin: 5px 12px; border-radius: 10px; cursor: pointer;
+        }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.15); color: white; }
+        .nav-item i { font-size: 18px; width: 24px; }
+        
+        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.15); }
+        .btn-logout {
+            width: 100%; padding: 12px; background: #e63946; color: white;
+            border: none; border-radius: 8px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; font-size: 14px; font-weight: 600; transition: all 0.3s;
+        }
+        .btn-logout:hover { background: #d62839; transform: translateY(-2px); }
+        
+        /* Main Content */
+        .main-wrapper { flex: 1; margin-left: 260px; display: flex; flex-direction: column; }
+        
+        .top-header {
+            background: white; padding: 25px 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-bottom: 3px solid #52b788;
+        }
+        .top-header h1 { font-size: 26px; color: #1e5128; margin-bottom: 5px; }
+        .top-header p { color: #6c757d; font-size: 14px; }
+        
+        .dashboard-content { padding: 30px; }
+        
+        /* Profile Card */
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(30, 81, 40, 0.08);
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
+            color: white;
+            padding: 50px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 56px;
+            color: #52b788;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 5px solid rgba(255,255,255,0.3);
+        }
+        
+        .profile-header h2 { margin: 0 0 5px; font-size: 28px; }
+        .profile-header p { margin: 0; opacity: 0.9; font-size: 15px; }
+        
+        .profile-body { padding: 35px; }
+        
+        .info-row {
+            display: flex;
+            padding: 18px 0;
+            border-bottom: 1px solid #f1f3f5;
+            align-items: center;
+        }
+        
+        .info-row:last-child { border-bottom: none; }
+        
+        .info-label {
+            width: 180px;
+            font-weight: 600;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-label i { color: #52b788; width: 20px; }
+        
+        .info-value {
+            flex: 1;
+            color: #1e5128;
+            font-weight: 500;
+        }
+        
+        .badge-role {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #d8f3dc;
+            color: #1e5128;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .stats-info {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .stat-item h4 { color: #52b788; font-size: 28px; margin: 0 0 5px; }
+        .stat-item p { color: #6c757d; font-size: 13px; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>SIG Ternate</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i><span>Dashboard</span>
+                </a>
+                <a href="peta.html" class="nav-item">
+                    <i class="fas fa-map"></i><span>Peta</span>
+                </a>
+                <a href="data.html" class="nav-item">
+                    <i class="fas fa-database"></i><span>Data</span>
+                </a>
+                <a href="user.html" class="nav-item active">
+                    <i class="fas fa-user"></i><span>User</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i><span>Keluar</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+            <header class="top-header">
+                <h1>Profil Pengguna</h1>
+                <p>Informasi akun Anda</p>
+            </header>
+
+            <main class="dashboard-content">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h2 id="userName">-</h2>
+                        <p id="userRole">-</p>
+                    </div>
+                    
+                    <div class="profile-body">
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="fas fa-user"></i> Username
+                            </div>
+                            <div class="info-value" id="userUsername">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="fas fa-envelope"></i> Email
+                            </div>
+                            <div class="info-value" id="userEmail">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="fas fa-shield-alt"></i> Role
+                            </div>
+                            <div class="info-value">
+                                <span class="badge-role" id="userRoleBadge">-</span>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="fas fa-calendar"></i> Tanggal Registrasi
+                            </div>
+                            <div class="info-value" id="userRegistered">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="fas fa-clock"></i> Terakhir Login
+                            </div>
+                            <div class="info-value" id="lastLogin">-</div>
+                        </div>
+                        
+                        <div class="stats-info">
+                            <div class="stat-item">
+                                <h4 id="totalData">0</h4>
+                                <p>Total Data Tempat Ibadah</p>
+                            </div>
+                            <div class="stat-item">
+                                <h4 id="totalMasjid">0</h4>
+                                <p>Total Masjid</p>
+                            </div>
+                            <div class="stat-item">
+                                <h4 id="totalGereja">0</h4>
+                                <p>Total Gereja</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            // Check authentication
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Load user data
+            const userData = JSON.parse(localStorage.getItem('currentUser'));
+            if (userData) {
+                document.getElementById('userName').textContent = userData.nama || userData.username;
+                document.getElementById('userUsername').textContent = userData.username;
+                document.getElementById('userEmail').textContent = userData.email || '-';
+                document.getElementById('userRole').textContent = userData.role || 'User';
+                document.getElementById('userRoleBadge').textContent = userData.role || 'User';
+                
+                if (userData.registeredAt) {
+                    document.getElementById('userRegistered').textContent = 
+                        new Date(userData.registeredAt).toLocaleDateString('id-ID', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                } else {
+                    document.getElementById('userRegistered').textContent = 'Admin Account';
+                }
+            }
+            
+            // Load last login
+            const loginTime = localStorage.getItem('loginTime');
+            if (loginTime) {
+                document.getElementById('lastLogin').textContent = 
+                    new Date(loginTime).toLocaleString('id-ID');
+            }
+            
+            // Load statistics
+            const places = JSON.parse(localStorage.getItem('placesOfWorship')) || [];
+            document.getElementById('totalData').textContent = places.length;
+            document.getElementById('totalMasjid').textContent = 
+                places.filter(p => p.jenis === 'Masjid').length;
+            document.getElementById('totalGereja').textContent = 
+                places.filter(p => p.jenis === 'Gereja').length;
+        });
+
+        function logout() {
+            if(confirm('Apakah Anda yakin ingin keluar?')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
