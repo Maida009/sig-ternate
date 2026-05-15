@@ -264,65 +264,31 @@
         let map, markers = [], currentFilter = 'all';
         let tempatIbadahData = [];
         
-        // Default data fallback (jika database kosong)
+        // Default data fallback (jika database kosong/error)
         const defaultData = [
             { id: 1, nama: "Masjid Babul Jannah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Merdeka", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 500, latitude: 0.79745, longitude: 127.3637013 },
-            { id: 2, nama: "Masjid Ainul Yaqin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pahlawan", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 300, latitude: 0.799216, longitude: 127.360860 },
-            { id: 3, nama: "Masjid Ikhwanul Muslimin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sudirman", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 400, latitude: 0.79949, longitude: 127.38203 },
-            { id: 4, nama: "Masjid Nurul Iman", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sultan Babullah", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 350, latitude: 0.79371, longitude: 127.38298 },
-            { id: 5, nama: "Masjid Al-Hidayah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Ahmad Yani", kelurahan: "Makassar Selatan", kecamatan: "Ternate Tengah", kapasitas: 350, latitude: 0.79413, longitude: 127.38553 },
-            { id: 6, nama: "Masjid Al-Islah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Diponegoro", kelurahan: "Makassar Selatan", kecamatan: "Ternate Tengah", kapasitas: 450, latitude: 0.78959, longitude: 127.38131 },
-            { id: 7, nama: "Masjid Al-Khairat", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pattimura", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 380, latitude: 0.79566, longitude: 127.38447 },
-            { id: 8, nama: "Masjid Al-Amin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Hasanuddin", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 420, latitude: 0.78789, longitude: 127.38721 },
-            { id: 9, nama: "Masjid Al-Mujahidin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Veteran", kelurahan: "Makassar Selatan", kecamatan: "Ternate selatan", kapasitas: 360, latitude: 0.77568, longitude: 127.37924 },
-            { id: 10, nama: "Masjid At-Taqwa", agama: "Islam", jenis: "Masjid", alamat: "Jl. Gatot Subroto", kelurahan: "Salahudin", kecamatan: "Ternate Tengah", kapasitas: 400, latitude: 0.79104, longitude: 127.37995 },
-            { id: 11, nama: "Masjid Al-Munawar", agama: "Islam", jenis: "Masjid", alamat: "Jl. Suprapto", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 340, latitude: 0.78962, longitude: 127.39006 },
-            { id: 12, nama: "Masjid Al-Muttaqin", agama: "Islam", jenis: "Masjid", alamat: "Jl. MT. Habib ABUBAKAR ALATAS", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 380, latitude: 0.79173, longitude: 127.38789 },
-            { id: 13, nama: "Masjid Nurul Bazar", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sultan M. Djabir Syah", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 320, latitude: 0.79325, longitude: 127.38887 },
-            { id: 14, nama: "Masjid Nurul Mubin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pendidikan", kelurahan: "Maliaro", kecamatan: "Ternate Tengah", kapasitas: 360, latitude: 0.78884, longitude: 127.37716 },
-            { id: 15, nama: "Masjid Darul Arqam", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sultan Khairun No. 76", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 400, latitude: 0.79736, longitude: 127.38475 },
-            { id: 16, nama: "Masjid Al-Fatah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Gamayou Blok A", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 380, latitude: 0.79602, longitude: 127.37635 },
-            { id: 17, nama: "Masjid Miftahul Huda", agama: "Islam", jenis: "Masjid", alamat: "Jl. Gamayou", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 360, latitude: 0.79855, longitude: 127.37325 },
-            { id: 18, nama: "Masjid An-Nur", agama: "Islam", jenis: "Masjid", alamat: "Jl. Cahaya", kelurahan: "Maliaro", kecamatan: "Ternate Tengah", kapasitas: 340, latitude: 0.78807, longitude: 127.37707 },
-            { id: 19, nama: "Masjid Arrahman", agama: "Islam", jenis: "Masjid", alamat: "Jl. Rahmat", kelurahan: "Maliaro", kecamatan: "Ternate Tengah", kapasitas: 380, latitude: 0.78388, longitude: 127.37607 },
-            { id: 20, nama: "Masjid Nurul Hijrah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Raya Kalumata", kelurahan: "Kalumata", kecamatan: "Ternate Selatan", kapasitas: 450, latitude: 0.76180, longitude: 127.36409 },
-            { id: 21, nama: "Masjid Hubbuddin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Ngade Raya", kelurahan: "Kalumata", kecamatan: "Ternate Selatan", kapasitas: 380, latitude: 0.76127, longitude: 127.36635 },
-            { id: 22, nama: "Masjid Nurul Fatah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sasa Indah", kelurahan: "Bastiong Karance", kecamatan: "Ternate Selatan", kapasitas: 320, latitude: 0.76606, longitude: 127.37376 },
-            { id: 23, nama: "Masjid Nurul Yakin", agama: "Islam", jenis: "Masjid", alamat: "", kelurahan: "Tabona", kecamatan: "Ternate Selatan", kapasitas: 360, latitude: 0.77256, longitude: 127.36718 },
-            { id: 24, nama: "Masjid Raudhatul Murtasyidin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pantai Sasa", kelurahan: "Fitu", kecamatan: "Ternate Selatan", kapasitas: 400, latitude: 0.75814, longitude: 127.34488 },
-            { id: 25, nama: "Masjid An-Nur", agama: "Islam", jenis: "Masjid", alamat: "Jl. Ngade Selatan", kelurahan: "Ngade", kecamatan: "Ternate Selatan", kapasitas: 380, latitude: 0.758945, longitude: 127.35600 },
-            { id: 26, nama: "Masjid Hibbatullah", agama: "Islam", jenis: "Masjid", alamat: "Jl. kalumata Utara", kelurahan: "Kalumata", kecamatan: "Ternate Selatan", kapasitas: 340, latitude: 0.76436, longitude: 127.35843 },
-            { id: 27, nama: "Masjid Raudhatul Hidayah", agama: "Islam", jenis: "Masjid", alamat: "Jl. ", kelurahan: "Kalumata", kecamatan: "Ternate Selatan", kapasitas: 420, latitude: 0.76547, longitude: 127.36496 },
-            { id: 28, nama: "Masjid Syekh Yusuf", agama: "Islam", jenis: "Masjid", alamat: "Jl. ", kelurahan: "Bastiong Talangame", kecamatan: "Ternate Selatan", kapasitas: 400, latitude: 0.76917, longitude: 127.37560 },
-            { id: 29, nama: "Masjid Al-Amin", agama: "Islam", jenis: "Masjid", alamat: "Jl. falajawa Dua", kelurahan: "Bastiong Karance", kecamatan: "Ternate Selatan", kapasitas: 380, latitude: 0.76457, longitude: 127.37144 },
-            { id: 31, nama: "Masjid Khairil Jama'ah", agama: "Islam", jenis: "Masjid", alamat: "Jl. Pahlawan", kelurahan: "Kayu Merah", kecamatan: "Ternate Selatan", kapasitas: 360, latitude: 0.76305, longitude: 127.36986 },
-            { id: 32, nama: "Masjid Alauddin", agama: "Islam", jenis: "Masjid", alamat: "Jl. Sultan", kelurahan: "Ubo-Ubo", kecamatan: "Ternate Selatan", kapasitas: 400, latitude: 0.76858, longitude: 127.36986 },
-            { id: 33, nama: "GPM Immanuel Ternate", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Gereja No. 1", kelurahan: "Stadion", kecamatan: "Ternate Tengah", kapasitas: 350, latitude: 0.78707, longitude: 127.38577 },
-            { id: 34, nama: "GMIH Eben Haezer", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Bethel No. 5", kelurahan: "Tanah Raja", kecamatan: "Ternate Tengah", kapasitas: 300, latitude: 0.78731, longitude: 127.38616 },
-            { id: 35, nama: "GPDI El-Shaddai", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Yos Sudarso", kelurahan: "Kalumpang", kecamatan: "Ternate Tengah", kapasitas: 280, latitude: 0.78934, longitude: 127.38573 },
-            { id: 36, nama: "GKPMI Bethlehem", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Kapitan Pattimura", kelurahan: "Kalumpang", kecamatan: "Ternate Tengah", kapasitas: 320, latitude: 0.78863, longitude: 127.38505 },
-            { id: 37, nama: "GPT Kristus Raja", agama: "Kristen", jenis: "Gereja", alamat: "Jl. A.I.S Nasution", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 340, latitude: 0.78880, longitude: 127.38693 },
-            { id: 38, nama: "GBI Bethany", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Sion No. 2", kelurahan: "Jati", kecamatan: "Ternate Selatan", kapasitas: 300, latitude: 0.77594, longitude: 127.37740 },
-            { id: 39, nama: "GBI Filadelfia", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Stadion", kelurahan: "Makassar Barat", kecamatan: "Ternate Tengah", kapasitas: 280, latitude: 0.78571, longitude: 127.38386 },
-            { id: 40, nama: "MRII Kota Ternate", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Nazaret No. 4", kelurahan: "Gamalama", kecamatan: "Ternate Tengah", kapasitas: 260, latitude: 0.79236, longitude: 127.38977 }
+            { id: 33, nama: "GPM Immanuel Ternate", agama: "Kristen", jenis: "Gereja", alamat: "Jl. Gereja No. 1", kelurahan: "Stadion", kecamatan: "Ternate Tengah", kapasitas: 350, latitude: 0.78707, longitude: 127.38577 }
         ];
 
         // ===================================================================
-        // HELPER: Format Data dari Supabase
+        // HELPER: Format Data dari Supabase (SUDAH DIPERBAIKI)
         // ===================================================================
         function formatSupabaseData(data) {
+            if (!data || !Array.isArray(data)) return [];
+            
             return data.map(item => ({
-                id: item.pengenal || item.id,
+                id: item.id,                              // ✅ Langsung pakai 'id'
                 nama: item.nama,
                 jenis: item.jenis,
                 agama: item.jenis === 'Masjid' ? 'Islam' : 'Kristen',
                 alamat: item.alamat || '',
-                kelurahan: item.kelurahan || '',
-                kecamatan: item.kecamatan || '',
+                kelurahan: item.kelurahan || '-',
+                kecamatan: item.kecamatan || '-',
                 kapasitas: item.kapasitas || 0,
-                latitude: item.lintang || item.latitude,
-                longitude: item.garis_bujur || item.longitude,
-                created_at: item.dibuat_pada || item.created_at
+                // ✅ Prioritaskan latitude/longitude, fallback ke lintang/garis_bujur
+                latitude: item.latitude !== undefined ? item.latitude : (item.lintang || 0),
+                longitude: item.longitude !== undefined ? item.longitude : (item.garis_bujur || 0),
+                created_at: item.created_at || item.dibuat_pada
             }));
         }
 
@@ -356,11 +322,11 @@
                     return;
                 }
                 
-                // Ambil data
+                // Ambil data menggunakan fungsi dari config.js
                 const rawData = await getDataIbadah();
                 
                 if (rawData && rawData.length > 0) {
-                    // Format data dari Supabase
+                    // Format data agar cocok dengan format web
                     tempatIbadahData = formatSupabaseData(rawData);
                     console.log('✅ Data berhasil dimuat:', tempatIbadahData.length, 'tempat ibadah');
                 } else {
@@ -385,17 +351,20 @@
         // INITIALIZE MAP
         // ===================================================================
         function initMap() {
-            map = L.map('map').setView([0.775, 127.370], 13);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
+            // Inisialisasi peta hanya jika belum ada
+            if (!map) {
+                map = L.map('map').setView([0.775, 127.370], 13);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+            }
             
             displayPlaces(tempatIbadahData);
             updateStats();
             
-            console.log('🗺️ Peta initialized');
+            console.log('🗺️ Peta initialized dengan', tempatIbadahData.length, 'marker');
         }
         
         // ===================================================================
@@ -406,7 +375,7 @@
             const color = colors[agama] || '#333';
             return L.divIcon({
                 className: 'custom-marker',
-                html: `<div style="background:${color};width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`,
+                html: `<div style="background:${color};width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;">${agama === 'Islam' ? '🕌' : '⛪'}</div>`,
                 iconSize: [30, 30],
                 iconAnchor: [15, 15]
             });
@@ -419,6 +388,7 @@
             const placeList = document.getElementById('placeList');
             placeList.innerHTML = '';
             
+            // Hapus marker lama
             markers.forEach(m => map.removeLayer(m));
             markers = [];
             
@@ -428,13 +398,19 @@
             }
             
             data.forEach(place => {
-                // List item
+                // Validasi koordinat
+                if (!place.latitude || !place.longitude) {
+                    console.warn('⚠️ Data tanpa koordinat:', place.nama);
+                    return;
+                }
+                
+                // List item di sidebar
                 const item = document.createElement('div');
                 item.className = 'place-item';
                 item.innerHTML = `
                     <h4>${place.nama}</h4>
                     <p>📍 ${place.alamat}</p>
-                    <p>🏛️ ${place.kecamatan}</p>
+                    <p>🏛️ ${place.kecamatan} • ${place.kelurahan}</p>
                     <span class="badge badge-${place.agama.toLowerCase()}">${place.agama}</span>
                 `;
                 item.onclick = () => {
@@ -447,7 +423,7 @@
                 };
                 placeList.appendChild(item);
                 
-                // Map marker
+                // Marker di peta
                 const marker = L.marker([place.latitude, place.longitude], {
                     icon: getIcon(place.agama)
                 }).addTo(map);
@@ -470,6 +446,7 @@
         // FILTER & SEARCH
         // ===================================================================
         function filterData(agama) {
+            // Update active button
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             currentFilter = agama;
@@ -486,9 +463,12 @@
             const keyword = e.target.value.toLowerCase();
             let filtered = tempatIbadahData;
             
+            // Apply category filter first
             if (currentFilter !== 'all') {
                 filtered = filtered.filter(p => p.agama === currentFilter);
             }
+            
+            // Apply search filter
             if (keyword) {
                 filtered = filtered.filter(p => 
                     p.nama.toLowerCase().includes(keyword) ||

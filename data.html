@@ -208,33 +208,44 @@
         let places = [];
 
         // ===================================================================
-        // FORMAT MAPPING (Web <-> Database)
+        // FORMAT MAPPING (Web ↔ Database) - SUDAH DIPERBAIKI
         // ===================================================================
+        
+        /**
+         * Web → Database: Format data dari form agar cocok untuk Supabase
+         * Mengirim nama kolom standar: latitude, longitude (BUKAN lintang/garis_bujur)
+         */
         function formatForSupabase(data) {
             return {
                 nama: data.nama,
                 jenis: data.jenis,
-                kecamatan: data.kecamatan,
-                kelurahan: data.kelurahan || '',
                 alamat: data.alamat,
-                lintang: parseFloat(data.latitude),
-                garis_bujur: parseFloat(data.longitude)
+                kelurahan: data.kelurahan || '',
+                kecamatan: data.kecamatan || '',
+                latitude: parseFloat(data.latitude) || 0,    // ✅ Kirim sebagai 'latitude'
+                longitude: parseFloat(data.longitude) || 0,  // ✅ Kirim sebagai 'longitude'
+                kapasitas: parseInt(data.kapasitas) || 0
             };
         }
 
+        /**
+         * Database → Web: Format data dari Supabase agar cocok untuk frontend
+         * Mendukung kedua nama kolom untuk kompatibilitas
+         */
         function formatFromSupabase(data) {
             if (!data || !Array.isArray(data)) return [];
             return data.map(item => ({
-                id: item.pengenal || item.id,
+                id: item.id,  // ✅ Ambil 'id' langsung
                 nama: item.nama,
                 jenis: item.jenis,
                 agama: item.jenis === 'Masjid' ? 'Islam' : 'Kristen',
-                kecamatan: item.kecamatan || '-',
-                kelurahan: item.kelurahan || '-',
                 alamat: item.alamat || '',
+                kelurahan: item.kelurahan || '-',
+                kecamatan: item.kecamatan || '-',
                 kapasitas: item.kapasitas || 0,
-                latitude: item.lintang || item.latitude,
-                longitude: item.garis_bujur || item.longitude
+                // ✅ Fleksibel: ambil latitude atau lintang, longitude atau garis_bujur
+                latitude: item.latitude !== undefined ? item.latitude : (item.lintang || 0),
+                longitude: item.longitude !== undefined ? item.longitude : (item.garis_bujur || 0)
             }));
         }
 
@@ -355,7 +366,7 @@
         }
 
         // ===================================================================
-        // SAVE DATA (CREATE/UPDATE)
+        // SAVE DATA (CREATE/UPDATE) - SUDAH DIPERBAIKI
         // ===================================================================
         async function saveData() {
             const form = document.getElementById('dataForm');
@@ -384,6 +395,8 @@
 
             try {
                 console.log('📝 Data to save:', newData);
+                
+                // ✅ PERBAIKAN: Gunakan formatForSupabase yang mengirim latitude/longitude
                 const payload = formatForSupabase(newData);
                 console.log('📦 Payload for Supabase:', payload);
                 
@@ -392,7 +405,7 @@
 
                 if (editId) {
                     // === MODE UPDATE ===
-                    console.log('🔄 Updating record with pengenal:', editId);
+                    console.log('🔄 Updating record with ID:', editId);
                     success = await updateDataIbadah(parseInt(editId), payload);
                     message = success ? '✅ Data berhasil diupdate!' : '❌ Gagal mengupdate data';
                 } else {
@@ -422,7 +435,7 @@
         }
 
         // ===================================================================
-        // DELETE DATA
+        // DELETE DATA - SUDAH DIPERBAIKI
         // ===================================================================
         async function deleteData(id) {
             if (!confirm('Yakin ingin menghapus data ini?')) return;
@@ -430,7 +443,9 @@
             const originalPlaces = [...places]; // Backup untuk rollback jika gagal
             
             try {
-                console.log('🗑️ Deleting record with pengenal:', id);
+                console.log('🗑️ Deleting record with ID:', id);
+                
+                // ✅ PERBAIKAN: Gunakan deleteDataIbadah dengan filter 'id'
                 const success = await deleteDataIbadah(id);
                 
                 if (success) {

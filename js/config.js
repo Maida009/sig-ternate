@@ -3,17 +3,16 @@
 // Konfigurasi Supabase untuk SIG Tempat Ibadah Ternate
 // ===================================================================
 
-// ⚠️ PENTING: Ganti dengan URL dan Key project Anda
+// ⚠️ PENTING: Pastikan URL dan Key sesuai project Anda
 const SUPABASE_URL = 'https://daoqlzvgblsefahvndge.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ZnZSmKdWfCb3Sd5Mg6YYkg_12l1yMCq';
 
 // ===================================================================
-// FUNGSI CRUD (Create, Read, Update, Delete)
+// FUNGSI CRUD
 // ===================================================================
 
 /**
  * READ: Mengambil semua data tempat ibadah
- * @returns {Promise<Array>} Data mentah dari Supabase
  */
 async function getDataIbadah() {
     try {
@@ -27,24 +26,24 @@ async function getDataIbadah() {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+            const err = await response.text();
+            console.error(`❌ HTTP ${response.status}:`, err);
+            return [];
         }
 
         return await response.json();
     } catch (error) {
-        console.error('❌ Gagal mengambil data:', error);
+        console.error('❌ getDataIbadah error:', error.message);
         return [];
     }
 }
 
 /**
  * CREATE: Menambah data baru
- * @param {Object} dataBaru - Objek data dengan format Supabase
- * @returns {Promise<boolean>} True jika berhasil
  */
 async function saveDataIbadah(dataBaru) {
     try {
-        console.log('📤 Sending data to Supabase:', dataBaru);
+        console.log('📤 Sending to Supabase:', dataBaru);
         
         const response = await fetch(`${SUPABASE_URL}/rest/v1/tempat_ibadah`, {
             method: 'POST',
@@ -52,39 +51,42 @@ async function saveDataIbadah(dataBaru) {
                 'apikey': SUPABASE_KEY,
                 'Authorization': `Bearer ${SUPABASE_KEY}`,
                 'Content-Type': 'application/json',
-                'Prefer': 'return=minimal' 
+                'Prefer': 'return=minimal'
             },
             body: JSON.stringify(dataBaru)
         });
 
-        console.log('📥 Response status:', response.status, 'OK:', response.ok);
+        console.log('📥 Status:', response.status, 'OK:', response.ok);
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Supabase Error:', errorText);
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
+            const err = await response.text();
+            console.error('❌ Supabase Error:', err);
+            // Tampilkan error yang lebih spesifik
+            if (err.includes('duplicate key')) {
+                console.error('⚠️ Data sudah ada (duplicate)');
+            } else if (err.includes('null value in column')) {
+                console.error('⚠️ Ada kolom wajib yang kosong');
+            }
+            return false;
         }
 
-        console.log('✅ Data berhasil disimpan');
+        console.log('✅ Data saved successfully');
         return true;
     } catch (error) {
-        console.error('❌ Error saveDataIbadah:', error.message);
+        console.error('❌ saveDataIbadah error:', error.message);
         return false;
     }
 }
 
 /**
  * UPDATE: Mengubah data yang sudah ada
- * @param {number} id - ID (pengenal) data yang akan diupdate
- * @param {Object} dataUbah - Objek data baru
- * @returns {Promise<boolean>} True jika berhasil
  */
 async function updateDataIbadah(id, dataUbah) {
     try {
-        console.log('🔄 Updating ID (pengenal):', id, dataUbah);
+        console.log('🔄 Updating ID:', id, dataUbah);
         
-        // PENTING: Gunakan filter 'pengenal' karena itu nama kolom Primary Key di DB Anda
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/tempat_ibadah?pengenal=eq.${id}`, {
+        // Gunakan filter 'id' (primary key standar)
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/tempat_ibadah?id=eq.${id}`, {
             method: 'PATCH',
             headers: {
                 'apikey': SUPABASE_KEY,
@@ -95,33 +97,31 @@ async function updateDataIbadah(id, dataUbah) {
             body: JSON.stringify(dataUbah)
         });
 
-        console.log('📥 Response status:', response.status, 'OK:', response.ok);
+        console.log('📥 Status:', response.status, 'OK:', response.ok);
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Supabase Error:', errorText);
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
+            const err = await response.text();
+            console.error('❌ Supabase Error:', err);
+            return false;
         }
 
-        console.log('✅ Data berhasil diupdate');
+        console.log('✅ Data updated successfully');
         return true;
     } catch (error) {
-        console.error('❌ Error updateDataIbadah:', error.message);
+        console.error('❌ updateDataIbadah error:', error.message);
         return false;
     }
 }
 
 /**
  * DELETE: Menghapus data
- * @param {number} id - ID (pengenal) data yang akan dihapus
- * @returns {Promise<boolean>} True jika berhasil
  */
 async function deleteDataIbadah(id) {
     try {
-        console.log('🗑️ Deleting ID (pengenal):', id);
+        console.log('🗑️ Deleting ID:', id);
         
-        // PENTING: Gunakan filter 'pengenal'
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/tempat_ibadah?pengenal=eq.${id}`, {
+        // Gunakan filter 'id'
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/tempat_ibadah?id=eq.${id}`, {
             method: 'DELETE',
             headers: {
                 'apikey': SUPABASE_KEY,
@@ -129,29 +129,24 @@ async function deleteDataIbadah(id) {
             }
         });
 
-        console.log('📥 Response status:', response.status, 'OK:', response.ok);
+        console.log('📥 Status:', response.status, 'OK:', response.ok);
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Supabase Error:', errorText);
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
+            const err = await response.text();
+            console.error('❌ Supabase Error:', err);
+            return false;
         }
 
-        console.log('✅ Data berhasil dihapus');
+        console.log('✅ Data deleted successfully');
         return true;
     } catch (error) {
-        console.error('❌ Error deleteDataIbadah:', error.message);
+        console.error('❌ deleteDataIbadah error:', error.message);
         return false;
     }
 }
 
-// ===================================================================
-// FUNGSI HELPER & UTILITIES
-// ===================================================================
-
 /**
  * TEST: Mengecek koneksi ke Supabase
- * @returns {Promise<boolean>} True jika terhubung
  */
 async function testConnection() {
     try {
@@ -168,16 +163,19 @@ async function testConnection() {
     }
 }
 
+// ===================================================================
+// FORMAT MAPPING (Web ↔ Database)
+// ===================================================================
+
 /**
- * FORMAT: Mengubah data dari Supabase agar cocok untuk Web (Peta/Data)
- * Database: { pengenal, lintang, garis_bujur, ... }
- * Web:      { id, latitude, longitude, ... }
+ * Database → Web: Format data dari Supabase agar cocok untuk frontend
+ * Mendukung kedua nama kolom: latitude/lintang, longitude/garis_bujur
  */
 function formatDataIbadah(data) {
     if (!data || !Array.isArray(data)) return [];
     
     return data.map(item => ({
-        id: item.pengenal || item.id,           // Map 'pengenal' -> 'id'
+        id: item.id,
         nama: item.nama,
         jenis: item.jenis,
         agama: item.jenis === 'Masjid' ? 'Islam' : 'Kristen',
@@ -185,16 +183,16 @@ function formatDataIbadah(data) {
         kelurahan: item.kelurahan || '-',
         kecamatan: item.kecamatan || '-',
         kapasitas: item.kapasitas || 0,
-        latitude: item.lintang || item.latitude,       // Map 'lintang' -> 'latitude'
-        longitude: item.garis_bujur || item.longitude, // Map 'garis_bujur' -> 'longitude'
-        created_at: item.dibuat_pada || item.created_at
+        // Fleksibel: ambil latitude atau lintang, longitude atau garis_bujur
+        latitude: item.latitude !== undefined ? item.latitude : (item.lintang || 0),
+        longitude: item.longitude !== undefined ? item.longitude : (item.garis_bujur || 0),
+        created_at: item.created_at || item.dibuat_pada
     }));
 }
 
 /**
- * FORMAT: Mengubah data dari Web agar cocok untuk Supabase
- * Web:      { latitude, longitude, ... }
- * Database: { lintang, garis_bujur, ... }
+ * Web → Database: Format data dari form agar cocok untuk Supabase
+ * Mengirim nama kolom standar: latitude, longitude
  */
 function formatForSupabase(data) {
     return {
@@ -203,14 +201,14 @@ function formatForSupabase(data) {
         alamat: data.alamat,
         kelurahan: data.kelurahan || '',
         kecamatan: data.kecamatan || '',
-        // Map 'latitude' -> 'lintang' dan 'longitude' -> 'garis_bujur'
-        lintang: parseFloat(data.latitude),
-        garis_bujur: parseFloat(data.longitude)
+        latitude: parseFloat(data.latitude) || 0,
+        longitude: parseFloat(data.longitude) || 0,
+        kapasitas: parseInt(data.kapasitas) || 0
     };
 }
 
 // ===================================================================
-// EXPORT (Untuk kompatibilitas module jika diperlukan)
+// EXPORT (Opsional - untuk Node.js environment)
 // ===================================================================
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

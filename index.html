@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SIG Tempat Ibadah Ternate</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Load config.js untuk konsistensi (opsional, untuk future expansion) -->
+    <script src="js/config.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -32,120 +36,69 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .logo-icon {
-            font-size: 56px;
-            margin-bottom: 15px;
-            color: #52b788;
-        }
-        
-        .logo h1 { 
-            color: #1e5128; 
-            margin-bottom: 8px;
-            font-size: 28px;
-        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo-icon { font-size: 56px; margin-bottom: 15px; color: #52b788; }
+        .logo h1 { color: #1e5128; margin-bottom: 8px; font-size: 28px; }
         .logo p { color: #6c757d; font-size: 14px; }
         
         .form-group { margin-bottom: 20px; }
         .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #1e5128;
-            font-size: 14px;
+            display: block; margin-bottom: 8px;
+            font-weight: 600; color: #1e5128; font-size: 14px;
         }
-        
         .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
+            width: 100%; padding: 12px 15px;
+            border: 2px solid #e2e8f0; border-radius: 8px;
+            font-size: 14px; transition: all 0.3s;
         }
-        
         .form-group input:focus {
-            outline: none;
-            border-color: #52b788;
+            outline: none; border-color: #52b788;
             box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.1);
         }
         
         .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            font-size: 13px;
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px; font-size: 13px;
         }
-        
         .form-options label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #4a5568;
-            cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+            color: #4a5568; cursor: pointer;
         }
-        
         .form-options input { cursor: pointer; }
         
         .btn-login {
-            width: 100%;
-            padding: 14px;
+            width: 100%; padding: 14px;
             background: linear-gradient(135deg, #52b788 0%, #40916c 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
+            color: white; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s; margin-top: 10px;
         }
-        
         .btn-login:hover { 
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(82, 183, 136, 0.4);
         }
-        
         .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+            opacity: 0.6; cursor: not-allowed; transform: none;
         }
         
         .info-box {
-            margin-top: 25px;
-            padding: 15px;
-            background: #f8fafc;
-            border-radius: 8px;
-            font-size: 13px;
-            border-left: 4px solid #52b788;
+            margin-top: 25px; padding: 15px;
+            background: #f8fafc; border-radius: 8px;
+            font-size: 13px; border-left: 4px solid #52b788;
         }
-        
         .info-box strong { color: #1e5128; }
         .info-box code {
-            background: #e9ecef;
-            padding: 2px 6px;
-            border-radius: 4px;
-            color: #1e5128;
-            font-weight: 600;
+            background: #e9ecef; padding: 2px 6px;
+            border-radius: 4px; color: #1e5128; font-weight: 600;
         }
         
         .error-message {
-            background: #fee;
-            color: #c53030;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
+            background: #fee; color: #c53030;
+            padding: 12px; border-radius: 8px;
+            margin-bottom: 15px; display: none;
             border-left: 4px solid #e63946;
             animation: shake 0.3s ease;
         }
-        
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
@@ -153,31 +106,20 @@
         }
         
         .register-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #6c757d;
-            font-size: 14px;
+            text-align: center; margin-top: 20px;
+            color: #6c757d; font-size: 14px;
         }
-        
         .register-link a {
-            color: #52b788;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
+            color: #52b788; text-decoration: none;
+            font-weight: 600; cursor: pointer;
         }
-        
         .register-link a:hover { text-decoration: underline; }
         
         /* Toast Notification */
         .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 9999;
+            position: fixed; top: 20px; right: 20px;
+            padding: 12px 20px; border-radius: 8px;
+            color: white; font-weight: 500; z-index: 9999;
             animation: slideIn 0.3s ease;
         }
         .toast.success { background: #52b788; }
@@ -185,6 +127,12 @@
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container { padding: 30px 25px; }
+            .logo h1 { font-size: 24px; }
         }
     </style>
 </head>
@@ -243,6 +191,7 @@
         // ===================================================================
         document.getElementById('btnRegister').addEventListener('click', function(e) {
             e.preventDefault();
+            // Gunakan assign() untuk kompatibilitas lebih baik
             window.location.assign('register.html');
         });
 
@@ -260,13 +209,21 @@
             
             // Reset error
             errorMsg.style.display = 'none';
+            errorMsg.textContent = '';
+            
+            // Validation: minimal length
+            if (password.length < 6 && username !== 'admin') {
+                errorMsg.textContent = '❌ Password minimal 6 karakter!';
+                errorMsg.style.display = 'block';
+                return;
+            }
             
             // Disable button & show loading
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memeriksa...';
             
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // Simulate network delay (bisa dihapus jika ingin instant)
+            await new Promise(resolve => setTimeout(resolve, 400));
             
             // Get registered users from localStorage
             const users = JSON.parse(localStorage.getItem('users')) || [];
@@ -303,9 +260,10 @@
                 // Show success & redirect
                 showToast('✅ Login berhasil! Mengalihkan...', 'success');
                 
+                // Redirect dengan replace agar tidak bisa back ke login
                 setTimeout(() => {
                     window.location.replace('dashboard.html');
-                }, 1200);
+                }, 1000);
                 
             } else {
                 // ❌ LOGIN GAGAL
@@ -322,7 +280,7 @@
                 btnLogin.disabled = false;
                 btnLogin.innerHTML = '🔑 Masuk';
                 
-                // Clear password field
+                // Clear password & focus
                 document.getElementById('password').value = '';
                 document.getElementById('password').focus();
             }
@@ -343,7 +301,8 @@
             
             // Auto remove after 3 seconds
             setTimeout(() => {
-                toast.style.animation = 'slideIn 0.3s ease reverse';
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
