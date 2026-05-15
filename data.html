@@ -74,34 +74,56 @@
     </style>
 </head>
 <body>
-    <div id="loading" class="loading-overlay"><div class="spinner"></div><p>Memuat data dari database...</p></div>
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Memuat data dari database...</p>
+    </div>
 
     <div class="dashboard-wrapper">
+        <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-header"><div class="logo"><i class="fas fa-map-marked-alt"></i><span>SIG Ternate</span></div></div>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>SIG Ternate</span>
+                </div>
+            </div>
             <nav class="sidebar-nav">
                 <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
                 <a href="peta.html" class="nav-item"><i class="fas fa-map"></i><span>Peta</span></a>
                 <a href="data.html" class="nav-item active"><i class="fas fa-database"></i><span>Data</span></a>
                 <a href="user.html" class="nav-item"><i class="fas fa-user"></i><span>User</span></a>
             </nav>
-            <div class="sidebar-footer"><button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></button></div>
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i><span>Keluar</span>
+                </button>
+            </div>
         </aside>
 
+        <!-- Main Content -->
         <div class="main-wrapper">
-            <header class="top-header"><h1>Kelola Data Tempat Ibadah</h1><p>Tambah, edit, dan hapus data tempat ibadah</p></header>
+            <header class="top-header">
+                <h1>Kelola Data Tempat Ibadah</h1>
+                <p>Tambah, edit, dan hapus data tempat ibadah</p>
+            </header>
+
             <main class="dashboard-content">
                 <div class="data-controls">
                     <div class="search-filter">
-                        <input type="text" id="searchInput" placeholder="🔍 Cari nama atau alamat...">
+                        <input type="text" id="searchInput" placeholder="🔍 Cari nama, alamat, atau kelurahan...">
                         <select id="filterKategori">
                             <option value="">Semua Kategori</option>
                             <option value="Masjid">Masjid</option>
                             <option value="Gereja">Gereja</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" onclick="openModal()" id="btnAdd"><i class="fas fa-plus"></i> Tambah Data</button>
+                    <button class="btn btn-primary" onclick="openModal()" id="btnAdd">
+                        <i class="fas fa-plus"></i> Tambah Data
+                    </button>
                 </div>
+
                 <div class="table-wrapper">
                     <table>
                         <thead>
@@ -115,16 +137,22 @@
                                 <th style="width: 100px;">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody"></tbody>
+                        <tbody id="tableBody">
+                            <!-- Data dimuat di sini -->
+                        </tbody>
                     </table>
                 </div>
             </main>
         </div>
     </div>
 
+    <!-- Modal Form -->
     <div id="formModal" class="modal">
         <div class="modal-box">
-            <div class="modal-header"><h3 id="modalTitle">Tambah Data</h3><span class="modal-close" onclick="closeModal()">&times;</span></div>
+            <div class="modal-header">
+                <h3 id="modalTitle">Tambah Data</h3>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
             <form id="dataForm" class="modal-body">
                 <input type="hidden" id="editId">
                 <div class="form-grid">
@@ -174,8 +202,10 @@
     </div>
 
     <script>
+        // ===================================================================
+        // GLOBAL VARIABLES
+        // ===================================================================
         let places = [];
-        const defaultData = []; // Data diambil dari Supabase
 
         // ===================================================================
         // FORMAT MAPPING (Web <-> Database)
@@ -193,6 +223,7 @@
         }
 
         function formatFromSupabase(data) {
+            if (!data || !Array.isArray(data)) return [];
             return data.map(item => ({
                 id: item.pengenal || item.id,
                 nama: item.nama,
@@ -208,7 +239,7 @@
         }
 
         // ===================================================================
-        // INIT & LOAD
+        // INIT & AUTH
         // ===================================================================
         window.addEventListener('load', async function() {
             if (localStorage.getItem('isLoggedIn') !== 'true') {
@@ -218,15 +249,25 @@
             await loadData();
         });
 
+        // ===================================================================
+        // LOAD DATA FROM SUPABASE
+        // ===================================================================
         async function loadData() {
             showLoading();
             try {
+                console.log('🔄 Mengambil data dari Supabase...');
+                
                 const connected = await testConnection();
-                if (!connected) throw new Error('Koneksi gagal');
+                if (!connected) {
+                    throw new Error('Koneksi ke Supabase gagal');
+                }
                 
                 const rawData = await getDataIbadah();
-                places = rawData && rawData.length > 0 ? formatFromSupabase(rawData) : [];
-                console.log('✅ Data loaded:', places.length);
+                console.log('✅ Raw data count:', rawData ? rawData.length : 0);
+                
+                places = formatFromSupabase(rawData);
+                console.log('✅ Data loaded:', places.length, 'places');
+                
             } catch (error) {
                 console.error('❌ Load error:', error);
                 showToast('Gagal memuat data dari database', 'error');
@@ -246,12 +287,17 @@
             const kat = document.getElementById('filterKategori').value;
             
             let filtered = places.filter(p => {
-                const matchSearch = p.nama.toLowerCase().includes(search) || p.alamat.toLowerCase().includes(search) || (p.kelurahan && p.kelurahan.toLowerCase().includes(search));
+                const matchSearch = 
+                    p.nama.toLowerCase().includes(search) || 
+                    p.alamat.toLowerCase().includes(search) || 
+                    (p.kelurahan && p.kelurahan.toLowerCase().includes(search)) ||
+                    (p.kecamatan && p.kecamatan.toLowerCase().includes(search));
                 const matchKat = !kat || p.jenis === kat;
                 return matchSearch && matchKat;
             });
 
             tbody.innerHTML = '';
+            
             if (filtered.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 30px; color: #888;">Tidak ada data ditemukan</td></tr>';
                 return;
@@ -268,15 +314,19 @@
                         <td>${p.kelurahan}</td>
                         <td>${p.alamat}</td>
                         <td>
-                            <button class="btn-sm btn-edit" onclick="editData(${p.id})"><i class="fas fa-edit"></i></button>
-                            <button class="btn-sm btn-delete" onclick="deleteData(${p.id})"><i class="fas fa-trash"></i></button>
+                            <button class="btn-sm btn-edit" onclick="editData(${p.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-sm btn-delete" onclick="deleteData(${p.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     </tr>`;
             });
         }
 
         // ===================================================================
-        // MODAL & CRUD
+        // MODAL FUNCTIONS
         // ===================================================================
         function openModal(id = null) {
             document.getElementById('formModal').classList.add('active');
@@ -304,15 +354,22 @@
             document.getElementById('formModal').classList.remove('active');
         }
 
+        // ===================================================================
+        // SAVE DATA (CREATE/UPDATE)
+        // ===================================================================
         async function saveData() {
             const form = document.getElementById('dataForm');
-            if (!form.checkValidity()) { form.reportValidity(); return; }
+            if (!form.checkValidity()) { 
+                form.reportValidity(); 
+                return; 
+            }
 
             const btnSave = document.getElementById('btnSave');
+            const originalBtnText = btnSave.innerHTML;
             btnSave.disabled = true;
             btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
-            const id = document.getElementById('editId').value;
+            const editId = document.getElementById('editId').value;
             const jenis = document.getElementById('kategori').value;
             
             const newData = {
@@ -326,71 +383,126 @@
             };
 
             try {
+                console.log('📝 Data to save:', newData);
                 const payload = formatForSupabase(newData);
+                console.log('📦 Payload for Supabase:', payload);
+                
                 let success = false;
+                let message = '';
 
-                if (id) {
-                    success = await updateDataIbadah(parseInt(id), payload);
+                if (editId) {
+                    // === MODE UPDATE ===
+                    console.log('🔄 Updating record with pengenal:', editId);
+                    success = await updateDataIbadah(parseInt(editId), payload);
+                    message = success ? '✅ Data berhasil diupdate!' : '❌ Gagal mengupdate data';
                 } else {
+                    // === MODE CREATE ===
+                    console.log('➕ Creating new record');
                     success = await saveDataIbadah(payload);
+                    message = success ? '✅ Data berhasil ditambahkan!' : '❌ Gagal menambah data';
                 }
 
                 if (success) {
-                    await loadData(); // Refresh data dari DB
-                    showToast('✅ Data berhasil disimpan!', 'success');
+                    // Reload data terbaru dari database
+                    await loadData();
+                    showToast(message, 'success');
                     closeModal();
                 } else {
-                    showToast('❌ Gagal menyimpan data', 'error');
+                    console.error('❌ Save operation failed');
+                    showToast(message, 'error');
                 }
+
             } catch (error) {
-                console.error('💥 Save error:', error);
+                console.error('💥 Unexpected error in saveData:', error);
                 showToast('Error: ' + error.message, 'error');
             } finally {
                 btnSave.disabled = false;
-                btnSave.innerHTML = '💾 Simpan';
+                btnSave.innerHTML = originalBtnText;
             }
         }
 
+        // ===================================================================
+        // DELETE DATA
+        // ===================================================================
         async function deleteData(id) {
             if (!confirm('Yakin ingin menghapus data ini?')) return;
+            
+            const originalPlaces = [...places]; // Backup untuk rollback jika gagal
+            
             try {
+                console.log('🗑️ Deleting record with pengenal:', id);
                 const success = await deleteDataIbadah(id);
+                
                 if (success) {
-                    await loadData();
+                    // Hapus dari array lokal
+                    places = places.filter(p => p.id !== id);
+                    renderTable();
                     showToast('✅ Data berhasil dihapus', 'success');
                 } else {
+                    // Rollback jika gagal
+                    places = originalPlaces;
                     showToast('❌ Gagal menghapus data', 'error');
                 }
             } catch (error) {
+                console.error('💥 Error in deleteData:', error);
+                places = originalPlaces; // Rollback
                 showToast('Error: ' + error.message, 'error');
             }
         }
 
-        function editData(id) { openModal(id); }
+        function editData(id) { 
+            console.log('✏️ Edit clicked for ID:', id);
+            openModal(id); 
+        }
 
         // ===================================================================
         // UTILITIES
         // ===================================================================
-        function showLoading() { document.getElementById('loading').classList.remove('hidden'); }
-        function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
-        function showToast(msg, type) {
-            const t = document.createElement('div');
-            t.className = `toast ${type}`;
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+        function showLoading() { 
+            document.getElementById('loading').classList.remove('hidden'); 
         }
+        
+        function hideLoading() { 
+            document.getElementById('loading').classList.add('hidden'); 
+        }
+        
+        function showToast(msg, type) {
+            // Remove existing toast
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
         function logout() {
-            if (confirm('Keluar dari sistem?')) {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('currentUser');
                 window.location.href = 'index.html';
             }
         }
 
+        // ===================================================================
+        // EVENT LISTENERS
+        // ===================================================================
         document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('filterKategori').addEventListener('change', renderTable);
-        window.onclick = function(e) { if (e.target.classList.contains('modal')) closeModal(); };
+        
+        // Close modal when clicking outside
+        window.onclick = function(e) { 
+            if (e.target.classList.contains('modal')) {
+                closeModal(); 
+            }
+        };
     </script>
 </body>
 </html>
